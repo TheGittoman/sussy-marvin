@@ -6,8 +6,11 @@ import (
 )
 
 type Config struct {
-	Token  string `json:"token"`
-	Prefix string `json:"prefix"`
+	Token     string `json:"token"`
+	GuildID   string `json:"GuildID"`
+	ChannelID string `json:"ChannelID"`
+	AppID     string `json:"AppID"`
+	Prefix    string `json:"prefix"`
 }
 
 func ParseConfigFromJSONFile(fileName string) (c *Config, err error) {
