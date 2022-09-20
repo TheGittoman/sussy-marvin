@@ -21,6 +21,5 @@ func ParseConfigFromJSONFile(fileName string) (c *Config, err error) {
 
 	c = new(Config)
 	err = json.NewDecoder(f).Decode(c)
-
 	return
 }
