@@ -12,7 +12,6 @@ import (
 )
 
 // Variables used for command line parameters
-
 func init() {
 	fmt.Print("Bot Initialized!\n")
 }
