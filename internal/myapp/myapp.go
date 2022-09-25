@@ -1,6 +1,10 @@
-package application
+package myapp
 
-import "github.com/bwmarrin/discordgo"
+import (
+	"fmt"
+
+	"github.com/bwmarrin/discordgo"
+)
 
 type Test struct {
 	text string
@@ -28,3 +32,8 @@ var (
 		},
 	}
 )
+
+func testFunc() {
+	fmt.Println("Test funct")
+	return
+}
