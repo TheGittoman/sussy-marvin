@@ -2,7 +2,7 @@ package application
 
 import "github.com/bwmarrin/discordgo"
 
-type test struct {
+type Test struct {
 	text string
 }
 
@@ -28,6 +28,3 @@ var (
 		},
 	}
 )
-
-func main() {
-}
