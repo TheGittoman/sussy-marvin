@@ -1,0 +1,15 @@
+{
+    "IntegerOptionMinValue": 1,
+    "DmPermission": false,
+    "DefaultMemberPermission": 0,
+    "CommandsFrame": [
+    {
+        "Name":"basic-command",
+        "Description":"Just a basic command"
+    },
+    {
+        "Name":"basic-command-2",
+        "Description":"Just a second basic command"
+    }
+    ]
+}
