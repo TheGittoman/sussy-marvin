@@ -1,7 +1,7 @@
 {
     "IntegerOptionMinValue": 1,
     "DmPermission": false,
-    "DefaultMemberPermission": 0,
+    "DefaultMemberPermissions": 8,
     "CommandsFrame": [
     {
         "Name":"basic-command",
