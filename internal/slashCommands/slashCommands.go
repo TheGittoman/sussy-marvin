@@ -1,10 +1,53 @@
 package slashCommands
 
 import (
+	"bufio"
 	"fmt"
+	"math/rand"
+	"os"
+	"strings"
+	"time"
 
 	"github.com/bwmarrin/discordgo"
 )
+
+func readData() (outString string) {
+	rand.Seed(time.Now().Unix())
+	var filename string = "./internal/data/data.dat"
+	file, err := os.Open(filename)
+
+	if err != nil {
+		panic(err)
+	}
+
+	sc := bufio.NewScanner(file)
+	lines := make([]string, 0)
+
+	for sc.Scan() {
+		lines = append(lines, sc.Text())
+	}
+
+	var marvin []string
+
+	for _, v := range lines {
+		if strings.Contains(v, "Marvin") {
+			marvin = append(marvin, v)
+		}
+	}
+
+	outString = marvin[func() int {
+		var i int
+		for {
+			i = rand.Intn(len(marvin))
+			if i < len(marvin) {
+				return i
+			}
+			fmt.Println(i)
+		}
+	}()]
+
+	return
+}
 
 var (
 	IntegerOptionMinValue          = 1.0
@@ -23,6 +66,10 @@ var (
 					Required:    true,
 				},
 			},
+		},
+		{
+			Name:        "quote",
+			Description: "get random quote from marvin the robot",
 		},
 	}
 
@@ -50,6 +97,16 @@ var (
 						content,
 						margs...,
 					),
+				},
+			})
+
+		},
+		"quote": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			content := readData()
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: content,
 				},
 			})
 
