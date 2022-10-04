@@ -16,10 +16,11 @@ var s *discordgo.Session
 var err error
 var cfg config.Config
 
-// Variables used for command line parameters
 func init() {
 	const fileName = "config/config.json"
-	cfg, err := config.ParseConfigFromJSONFile(fileName)
+	cfgnew, err := config.ParseConfigFromJSONFile(fileName)
+	cfg = *cfgnew
+
 	if err != nil {
 		fmt.Println("Error reading the config.json, ", err)
 		return
@@ -29,9 +30,6 @@ func init() {
 		fmt.Println("error creating Discord session,", err)
 		return
 	}
-}
-
-func init() {
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if h, ok := slashCommands.CommandHandlers[i.ApplicationCommandData().Name]; ok {
 			h(s, i)
@@ -56,6 +54,8 @@ func main() {
 		}
 		registeredCommands[i] = cmd
 	}
+	fmt.Println(cfg.RemoveCommands)
+	fmt.Println(cfg.AppID)
 
 	// Register the messageCreate func as a callback for MessageCreate events.
 	s.AddHandler(atCommands.MessageCreate)
@@ -66,7 +66,7 @@ func main() {
 	log.Println("Press Ctrl+C to exit")
 	<-stop
 
-	if *&cfg.RemoveCommands {
+	if cfg.RemoveCommands {
 		log.Println("Removing commands...")
 		// // We need to fetch the commands, since deleting requires the command ID.
 		// // We are doing this from the returned commands on line 375, because using
