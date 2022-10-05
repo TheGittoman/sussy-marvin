@@ -11,10 +11,12 @@ func GetMessage(m *discordgo.MessageCreate, s *discordgo.Session, find string, m
 	if m.Content == "" {
 		return
 	}
+
 	messageContent := m.Content
 	if strings.Contains(messageContent, find) {
 		s.ChannelMessageSend(m.ChannelID, message)
 	}
+
 	return
 }
 

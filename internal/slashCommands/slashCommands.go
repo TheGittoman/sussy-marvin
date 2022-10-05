@@ -11,7 +11,8 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func readData() (outString string) {
+// read a random line including marvin and returns it
+func readData(find string) (outString string) {
 	rand.Seed(time.Now().Unix())
 	var filename string = "./internal/data/data.dat"
 	file, err := os.Open(filename)
@@ -30,20 +31,15 @@ func readData() (outString string) {
 	var marvin []string
 
 	for _, v := range lines {
-		if strings.Contains(v, "Marvin") {
+		if strings.Contains(v, find) {
 			marvin = append(marvin, v)
 		}
 	}
 
 	outString = marvin[func() int {
 		var i int
-		for {
-			i = rand.Intn(len(marvin))
-			if i < len(marvin) {
-				return i
-			}
-			fmt.Println(i)
-		}
+		i = rand.Intn(len(marvin))
+		return i
 	}()]
 
 	return
@@ -102,7 +98,7 @@ var (
 
 		},
 		"quote": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			content := readData()
+			content := readData("Marvin")
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
