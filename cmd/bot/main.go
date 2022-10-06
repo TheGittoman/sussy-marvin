@@ -90,6 +90,7 @@ func main() {
 		}
 
 		log.Println("Gracefully shutting down.")
+		s.Close()
 	}
 	if !run {
 		fmt.Println("Not running the bot")
