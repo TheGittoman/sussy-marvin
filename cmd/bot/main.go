@@ -58,9 +58,6 @@ func main() {
 			}
 			registeredCommands[i] = cmd
 		}
-		fmt.Println(cfg.RemoveCommands)
-		fmt.Println(cfg.AppID)
-
 		// Register the messageCreate func as a callback for MessageCreate events.
 		s.AddHandler(atCommands.MessageCreate)
 

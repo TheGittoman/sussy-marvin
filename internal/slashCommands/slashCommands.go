@@ -62,18 +62,6 @@ var (
 	DefaultMemberPermissions int64 = discordgo.PermissionManageServer
 
 	Commands = []*discordgo.ApplicationCommand{
-		{ // my-command
-			Name:        "my-command",
-			Description: "My first command",
-			Options: []*discordgo.ApplicationCommandOption{
-				{
-					Type:        discordgo.ApplicationCommandOptionString,
-					Name:        "string",
-					Description: "string to print",
-					Required:    true,
-				},
-			},
-		},
 		{ // quote
 			Name:        "quote",
 			Description: "get random quote from marvin the robot",
@@ -92,32 +80,6 @@ var (
 		},
 	}
 	CommandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
-		"my-command": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			options := i.ApplicationCommandData().Options
-
-			optionMap := make(map[string]*discordgo.ApplicationCommandInteractionDataOption, len(options))
-			for _, opt := range options {
-				optionMap[opt.Name] = opt
-			}
-
-			margs := make([]interface{}, 0, len(options))
-			content := ""
-
-			if option, ok := optionMap["string"]; ok {
-				margs = append(margs, option.StringValue())
-				content += "%s\n"
-			}
-
-			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
-				Type: discordgo.InteractionResponseChannelMessageWithSource,
-				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf(
-						content,
-						margs...,
-					),
-				},
-			})
-		},
 		"quote": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			content := readData("Marvin", "./internal/data/data.dat")
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
