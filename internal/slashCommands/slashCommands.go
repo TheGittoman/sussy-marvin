@@ -78,7 +78,7 @@ var (
 			Name:        "quote",
 			Description: "get random quote from marvin the robot",
 		},
-		{ // delete-messages
+		{ // delete-message
 			Name:        "delete-messages",
 			Description: "delete messages up to an amount",
 			Options: []*discordgo.ApplicationCommandOption{
