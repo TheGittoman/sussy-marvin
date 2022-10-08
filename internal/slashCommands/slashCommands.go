@@ -92,6 +92,8 @@ var (
 		},
 		"delete-messages": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 			permission := i.Interaction.Member.Permissions // get interaction user perms
+			// httpError := make(map[string]map[string]string)
+			// httpError["HTTP 400 Bad Request"]["message"] = "You can only bulk delete messages that are under 14 days old."
 			content := ""
 			fail := false
 
@@ -116,8 +118,21 @@ var (
 
 					err = s.ChannelMessagesBulkDelete(i.ChannelID, messagesToString)
 					if err != nil {
-						content += err.Error()
+						for _, message := range messagesToString {
+							s.ChannelMessageDelete(i.ChannelID, message)
+							s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+								Type: discordgo.InteractionResponseChannelMessageWithSource,
+								Data: &discordgo.InteractionResponseData{
+									Content: fmt.Sprintf("%s \n deleting one by one %d messages", err.Error(), options[0].IntValue()),
+								},
+							})
+						}
 					}
+
+					/* HTTP 400 Bad Request,
+					{"message": "You can only bulk delete messages that are under 14 days old.",
+					"code": 50034} this message will be deleted in 5 seconds
+					*/
 
 					if err == nil {
 						content += "messages deleted: " + strconv.Itoa(int(options[0].IntValue()))
@@ -130,7 +145,7 @@ var (
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf(content + " this message will be deleted in 5 seconds"),
+					Content: fmt.Sprintf(content + " | this message will be deleted in 5 seconds"),
 				},
 			})
 			removeInteraction(s, i.Interaction)

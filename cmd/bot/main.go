@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -12,22 +11,18 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-var s *discordgo.Session
-var err error
-var cfg config.Config
-
-func init() {
+func botInitializing(s *discordgo.Session, err error, cfg *config.Config) (s_ *discordgo.Session, err_ error, cfg_ *config.Config) {
 	const fileName = "config/config.json"
-	cfgnew, err := config.ParseConfigFromJSONFile(fileName)
-	cfg = *cfgnew
+	cfg, err = config.ParseConfigFromJSONFile(fileName)
+	log.Printf("%t", cfg.RemoveCommands)
 
 	if err != nil {
-		fmt.Println("Error reading the config.json, ", err)
+		log.Println("Error reading the config.json, ", err)
 		return
 	}
 	s, err = discordgo.New("Bot " + cfg.Token)
 	if err != nil {
-		fmt.Println("error creating Discord session,", err)
+		log.Println("error creating Discord session,", err)
 		return
 	}
 	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -35,17 +30,25 @@ func init() {
 			h(s, i)
 		}
 	})
+	return s, err, cfg
+}
+
+func init() {
 }
 
 var run bool = true
 
 func main() {
-	// Open a websocket connection to Discord and begin listening.
+	var s *discordgo.Session
+	var err error
+	var cfg *config.Config
+	s, err, cfg = botInitializing(s, err, cfg) // initialize variables needed for running the bot
+
 	if run {
 
-		err = s.Open()
+		err = s.Open() // open connection to discord web services and start listening
 		if err != nil {
-			fmt.Println("error opening connection,", err)
+			log.Println("error opening connection,", err)
 			return
 		}
 
@@ -90,6 +93,6 @@ func main() {
 		s.Close()
 	}
 	if !run {
-		fmt.Println("Not running the bot")
+		log.Println("Not running the bot")
 	}
 }
