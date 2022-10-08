@@ -2,7 +2,9 @@ package slashCommands
 
 import (
 	"bufio"
+	"encoding/hex"
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"strconv"
@@ -79,6 +81,18 @@ var (
 				},
 			},
 		},
+		{ // tag-color
+			Name:        "tagcolor",
+			Description: "delete messages up to an amount",
+			Options: []*discordgo.ApplicationCommandOption{
+				{
+					Type:        discordgo.ApplicationCommandOptionString,
+					Name:        "hex-color",
+					Description: "hex code of role",
+					Required:    true,
+				},
+			},
+		},
 	}
 	CommandHandlers = map[string]func(s *discordgo.Session, i *discordgo.InteractionCreate){
 		"quote": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
@@ -149,6 +163,28 @@ var (
 				},
 			})
 			removeInteraction(s, i.Interaction)
+		},
+		"tagcolor": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			option := i.ApplicationCommandData().Options
+			hex_code_string := hex.EncodeToString([]byte(option[0].StringValue()))
+			hex_code_int, err := strconv.ParseInt(hex_code_string, 8, 8)
+			if err != nil {
+				log.Println(err)
+			}
+			role := new(discordgo.Role)
+			role.Name = "test"
+			role.Color = int(hex_code_int)
+			role.Mentionable = false
+			role.Managed = false
+
+			s.State.RoleAdd(i.GuildID, role)
+
+			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				Type: discordgo.InteractionResponseChannelMessageWithSource,
+				Data: &discordgo.InteractionResponseData{
+					Content: fmt.Sprintf("Tag color changed to #%s", hex_code_string),
+				},
+			})
 		},
 	}
 )

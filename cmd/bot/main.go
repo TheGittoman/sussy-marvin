@@ -11,32 +11,35 @@ import (
 	"github.com/bwmarrin/discordgo"
 )
 
-func botInitializing(s *discordgo.Session, err error, cfg *config.Config) (s_ *discordgo.Session, err_ error, cfg_ *config.Config) {
+func botInitializing() (s_ *discordgo.Session, cfg_ *config.Config, err_ error) {
 	const fileName = "config/config.json"
-	cfg, err = config.ParseConfigFromJSONFile(fileName)
-	if err != nil {
-		log.Println("Error reading the config.json, ", err)
+	cfg_, err_ = config.ParseConfigFromJSONFile(fileName)
+	if err_ != nil {
+		log.Println("Error reading the config.json, ", err_)
 		return
 	}
 
-	s, err = discordgo.New("Bot " + cfg.Token)
-	if err != nil {
-		log.Println("error creating Discord session,", err)
+	s_, err_ = discordgo.New("Bot " + cfg_.Token)
+	if err_ != nil {
+		log.Println("error creating Discord session,", err_)
 		return
 	}
-	s.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+	s_.AddHandler(func(s *discordgo.Session, i *discordgo.InteractionCreate) {
 		if h, ok := slashCommands.CommandHandlers[i.ApplicationCommandData().Name]; ok {
 			h(s, i)
 		}
 	})
-	return s, err, cfg
+	return s_, cfg_, err_
 }
 
 func main() {
-	var s *discordgo.Session
 	var err error
 	var cfg *config.Config
-	s, err, cfg = botInitializing(s, err, cfg) // initialize variables needed for running the bot
+	s, cfg, err := botInitializing() // initialize variables needed for running the bot
+	if err != nil {
+		log.Println("error opening connection,", err)
+		return
+	}
 
 	err = s.Open() // open connection to discord web services and start listening
 	if err != nil {
