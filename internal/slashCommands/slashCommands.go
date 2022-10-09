@@ -87,7 +87,7 @@ var (
 		},
 		{ // tag-color
 			Name:        "tagcolor",
-			Description: "delete messages up to an amount",
+			Description: "change tagcolor based on hex value",
 			Options: []*discordgo.ApplicationCommandOption{
 				{
 					Type:        discordgo.ApplicationCommandOptionString,
@@ -169,9 +169,9 @@ var (
 			removeInteraction(s, i.Interaction)
 		},
 		"tagcolor": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
-			boolFail := false
 			option := i.ApplicationCommandData().Options
 			hexString := option[0].StringValue() // get the hex code
+			boolFail := false
 			hexInt, err := strconv.ParseInt(parseHexString(hexString), 16, 64)
 			if err != nil {
 				log.Println(err)
@@ -179,7 +179,6 @@ var (
 			}
 			hexInt_ := int(hexInt)
 			boolFalse := false
-			foundRoleName := false
 
 			if len(parseHexString(hexString)) < 6 || len(parseHexString(hexString)) > 6 {
 				boolFail = true
@@ -188,7 +187,7 @@ var (
 			if !boolFail {
 
 				roleParams := new(discordgo.RoleParams)
-				roleParams.Name = "color_" + parseHexString(hexString)
+				roleParams.Name = "color"
 				roleParams.Color = &hexInt_
 				roleParams.Hoist = &boolFalse
 				roleParams.Mentionable = &boolFalse
@@ -198,8 +197,21 @@ var (
 					log.Println(err)
 				}
 
+				memberRoles := i.Interaction.Member.Roles
 				for _, r := range roles {
-					if r.Name == roleParams.Name {
+					for _, v := range memberRoles {
+						if r.ID == v {
+							err = s.GuildMemberRoleRemove(i.GuildID, i.Interaction.Member.User.ID, v)
+							if err != nil {
+								log.Println(err)
+							}
+						}
+					}
+				}
+
+				foundRoleName := false
+				for _, r := range roles {
+					if r.Color == *roleParams.Color {
 						foundRoleName = true
 						s.GuildMemberRoleAdd(i.GuildID, i.Interaction.Member.User.ID, r.ID)
 						break
