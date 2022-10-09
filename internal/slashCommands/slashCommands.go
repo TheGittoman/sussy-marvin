@@ -2,7 +2,6 @@ package slashCommands
 
 import (
 	"bufio"
-	"encoding/hex"
 	"fmt"
 	"log"
 	"math/rand"
@@ -59,6 +58,11 @@ func readData(find string, filename string) (outString string) {
 	return
 }
 
+func parseHexString(hexString string) string {
+	hexString = strings.Replace(hexString, "#", "", -1)
+	return hexString
+}
+
 var (
 	IntegerOptionMinValue          = 1.0
 	DmPermission                   = false
@@ -69,7 +73,7 @@ var (
 			Name:        "quote",
 			Description: "get random quote from marvin the robot",
 		},
-		{ // delete-message
+		{ // delete-mesage
 			Name:        "delete-messages",
 			Description: "delete messages up to an amount",
 			Options: []*discordgo.ApplicationCommandOption{
@@ -165,84 +169,65 @@ var (
 			removeInteraction(s, i.Interaction)
 		},
 		"tagcolor": func(s *discordgo.Session, i *discordgo.InteractionCreate) {
+			boolFail := false
 			option := i.ApplicationCommandData().Options
-			hex_code_string := hex.EncodeToString([]byte(option[0].StringValue()))
-			hex_code_int, err := strconv.ParseInt(hex_code_string, 8, 8)
+			hexString := option[0].StringValue() // get the hex code
+			hexInt, err := strconv.ParseInt(parseHexString(hexString), 16, 64)
 			if err != nil {
 				log.Println(err)
+				boolFail = true
 			}
-			role := new(discordgo.Role)
-			role.Name = "test"
-			role.Color = int(hex_code_int)
-			role.Mentionable = false
-			role.Managed = false
+			hexInt_ := int(hexInt)
+			boolFalse := false
+			foundRoleName := false
 
-			s.State.RoleAdd(i.GuildID, role)
+			if len(parseHexString(hexString)) < 6 || len(parseHexString(hexString)) > 6 {
+				boolFail = true
+			}
 
+			if !boolFail {
+
+				roleParams := new(discordgo.RoleParams)
+				roleParams.Name = "color_" + parseHexString(hexString)
+				roleParams.Color = &hexInt_
+				roleParams.Hoist = &boolFalse
+				roleParams.Mentionable = &boolFalse
+
+				roles, err := s.GuildRoles(i.GuildID)
+				if err != nil {
+					log.Println(err)
+				}
+
+				for _, r := range roles {
+					if r.Name == roleParams.Name {
+						foundRoleName = true
+						s.GuildMemberRoleAdd(i.GuildID, i.Interaction.Member.User.ID, r.ID)
+						break
+					}
+				}
+
+				if !foundRoleName {
+					role, err := s.GuildRoleCreate(i.GuildID, roleParams)
+					if err != nil {
+						log.Println(err)
+					}
+					s.GuildMemberRoleAdd(i.GuildID, i.Interaction.Member.User.ID, role.ID)
+				}
+
+				s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+					Type: discordgo.InteractionResponseChannelMessageWithSource,
+					Data: &discordgo.InteractionResponseData{
+						Content: fmt.Sprintf("Tag color of user %s changed to #%s", i.Interaction.Member.User.Username, hexString),
+					},
+				})
+			}
 			s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 				Type: discordgo.InteractionResponseChannelMessageWithSource,
 				Data: &discordgo.InteractionResponseData{
-					Content: fmt.Sprintf("Tag color changed to #%s", hex_code_string),
+					Content: "Input is incorrect",
 				},
 			})
+			removeInteraction(s, i.Interaction)
 		},
 	}
 )
-
-// type Commands struct {
-// 	IntegerOptionMinValue    json.Number     `json:"IntegerOptionMinValue`
-// 	DmPermission             bool            `json:"DmPermission"`
-// 	CefaultMemberPermissions int64           `json:"DefaultMemberPermissions`
-// 	CommandsFrame            []CommandsFrame `json:"CommandsFrame"`
-// }
-
-// type CommandsFrame struct {
-// 	Name        string `json:"Name"`
-// 	Description string `json:"Description"`
-// }
-
-// func check(err error) {
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// }
-
-// func readCommands() (coms *Commands) {
-// 	file, err := os.ReadFile("./config/commands.json")
-// 	check(err)
-// 	json.Unmarshal(file, &coms)
-// 	if coms.DefaultMemberPermissions == 0 {
-// 		coms.DefaultMemberPermissions = discordgo.PermissionManageServer
-// 	}
-// 	return coms
-// }
-
-// func Test() {
-// 	var com = readCommands()
-// 	println(com.DefaultMemberPermissions)
-// }
-
-// {
-// 	Name:        "basic-command",
-// 	Description: "description",
-// },
-// {
-// 	Name:        "basic-command-with-files",
-// 	Description: "description",
-// },
-// {
-// 	Name:        "followups",
-// 	Description: "description",
-// },
-// {
-// 	Name:        "localized-command",
-// 	Description: "description",
-// },
-// {
-// 	Name:        "options",
-// 	Description: "description",
-// },
-// {
-// 	Name:        "permission-overview",
-// 	Description: "description",
-// },

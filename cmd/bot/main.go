@@ -33,8 +33,6 @@ func botInitializing() (s_ *discordgo.Session, cfg_ *config.Config, err_ error) 
 }
 
 func main() {
-	var err error
-	var cfg *config.Config
 	s, cfg, err := botInitializing() // initialize variables needed for running the bot
 	if err != nil {
 		log.Println("error opening connection,", err)
