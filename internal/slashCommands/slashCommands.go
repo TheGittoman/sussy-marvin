@@ -50,8 +50,7 @@ func readData(find string, filename string) (outString string) {
 	}
 
 	outString = marvin[func() int {
-		var i int
-		i = rand.Intn(len(marvin))
+		i := rand.Intn(len(marvin))
 		return i
 	}()]
 
@@ -92,7 +91,7 @@ var (
 				{
 					Type:        discordgo.ApplicationCommandOptionString,
 					Name:        "hex-color",
-					Description: "hex code of role",
+					Description: "hex code of color",
 					Required:    true,
 				},
 			},
@@ -200,7 +199,7 @@ var (
 				memberRoles := i.Interaction.Member.Roles
 				for _, r := range roles {
 					for _, v := range memberRoles {
-						if r.ID == v {
+						if r.ID == v && r.Name == "color" {
 							err = s.GuildMemberRoleRemove(i.GuildID, i.Interaction.Member.User.ID, v)
 							if err != nil {
 								log.Println(err)
